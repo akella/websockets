@@ -33,6 +33,12 @@ io.on('connection', function(socket){
   socket.on('mousecursor', function(data){
     io.in(data.room).emit('mousecursor', data.mouse);
   });
+  socket.on('scroll', function(data){
+    io.in(data.room).emit('scroll', data.scroll);
+  });
+  socket.on('click', function(data){
+    io.in(data.room).emit('click', data.position);
+  });
   socket.on('connected', function(data){
     io.in(data.room).emit('connected', data.props);
   });
@@ -44,6 +50,7 @@ io.on('connection', function(socket){
   });
   socket.on('initRoom', function(data){
     io.emit('initRoom', data);
+    console.log(data);
   });
 
 });

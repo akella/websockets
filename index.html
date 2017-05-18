@@ -8,16 +8,39 @@
         overflow: auto;
         box-sizing: border-box;
       }
+      #wsform{
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        padding: 20px;
+        max-width: 220px;
+      }
+      #wsform div{
+        padding: 5px 0;
+      }
+      #wsform label{
+        width: 100px;
+        display: inline-block;
+        font-size: 10px;
+        text-transform: uppercase;
+      }
+      #wsform  input{
+        padding: 3px;
+        display: inline-block;
+        width: 200px;
+      }
     </style>
   </head>
   <body>
     <div id="view">
       
     </div>
-    room:<input type="text" name="" size="10" id="room" id=""><br>
-    message:<input type="text" name="" size="10" id="message" id=""><br>
-    <button id="join">Join Room</button>
-    <button id="send">Message to room</button>
+    <div id="wsform">
+      <div><label>room:</label><input type="text" name="" size="30" id="room" id=""><br></div>
+      <div><label>message:</label><input type="text" name="" size="30" id="message" id=""></div>
+      <button id="join">Join Room</button>
+      <button id="send">Message to room</button>
+    </div>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
@@ -34,6 +57,15 @@
           socket.emit('mousecursor', mdata); 
         }); 
 
+        $(document).on('click', function (e) {
+          var data = {};
+          data.position = {};
+          data.position.x = e.pageX;
+          data.position.y = e.pageY + $('#view').scrollTop();
+          data.room = $('#room').val() || '0';
+          socket.emit('click', data); 
+        });
+
         $('#send').on('click', function () {
           socket.emit('roomMessage', {room: $('#room').val(), message: $('#message').val() }); 
         });
@@ -44,14 +76,14 @@
 
         // init page, copy VIEW
         socket.on('connected',function(data){
-          console.log(data);
-          alert('connected');
+          console.log('connected',data);
           // if(data.room==$('#room').val()){
             $v = $('#view');
             $v.width(data.width);
             $v.height(data.height);
             $v.html($.parseHTML(data.html));
             $('head').append($.parseHTML(data.head));
+            $('#view').scrollTop(data.scrollTop);
           // }
         })
 
@@ -65,6 +97,15 @@
           });
           socket.emit('inputchange', data); 
         });
+
+        $('#view').scroll(function() {
+          let datascroll = {};
+          datascroll.room = $('#room').val() || '0';
+          datascroll.scroll = $('#view').scrollTop();
+          console.log(datascroll);
+          socket.emit('scroll', datascroll);
+        });
+
 
         // socket.on('room', function(room) {
         //     socket.join(room);
